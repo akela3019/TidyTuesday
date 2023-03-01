@@ -98,7 +98,7 @@ p_region <- languages_summ %>%
   geom_vline(xintercept = 0:13 + 0.5, color = "#ababab", linewidth = 0.4, linetype = 3) +
   geom_tile(color = "#f6f1eb", linewidth = 0.6) +
   scale_y_discrete(limits = rev, labels = function(x) {str_replace(x, " ", "\n")}) +
-  facet_grid(language_family ~ ., scale = "free", space = "free", switch = "y") +
+  facet_grid(language_family ~ region, scale = "free", space = "free", switch = "y") +
   coord_cartesian(expand = FALSE) +
   scale_fill_manual(values = fresh_palette) +
   labs(x = NULL, y = NULL, title = toupper("Countries spoken in")) +

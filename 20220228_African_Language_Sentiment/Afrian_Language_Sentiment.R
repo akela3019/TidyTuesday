@@ -8,19 +8,18 @@ library(grid)
 fresh_palette <- c("#65ADC2", "#E84646", "lightsteelblue4", "#C29365", "#168E7F")
 theme_light <- ggthemr::ggthemr("light")
 theme_custom <- theme(
-  plot.title = element_text(hjust = 0.5, size = 10.5, color = "#373634", face = "bold"),
-  plot.background = element_blank(),
-  text = element_text(family = "Corbel"),
+  text = element_text(family = "Corbel", color = "#373634"),
+  plot.title = element_text(hjust = 0.5, size = 10.5, face = "bold"),
+  legend.title = element_text(size = 10.5, face = "bold"),
   strip.clip = "off",
   axis.text.x = element_text(angle = 40, hjust = 1, size = 9),
   panel.spacing.y = unit(1.1, "mm"),
   panel.border = element_rect(color = "#ababab", fill = NA, linewidth = 0.3),
-  legend.title = element_text(size = 10.5, color = "#373634", face = "bold"),
   axis.line = element_blank()
 )
 
 # Load Data --------------------------
-tuesdata <- tidytuesdayR::tt_load('2023-02-28')
+# tuesdata <- tidytuesdayR::tt_load('2023-02-28')
 
 afrisenti <- tuesdata$afrisenti
 languages <- tuesdata$languages
@@ -77,7 +76,7 @@ p_language <- afrisenti_summ %>%
   facet_grid(language_family ~ ., scale = "free_y", space = "free_y", switch = "y") +
   scale_x_continuous(labels = function(x) {paste0(x * 100, "%")}, breaks = seq(0, 1, 0.2)) +
   scale_y_discrete(limits = rev, labels = function(x) {str_replace(x, " ", "\n")}) +
-  scale_fill_manual(name = "Sentiment", labels = function(x) {str_to_title(x)},
+  scale_fill_manual(name = "SENTIMENT", labels = function(x) {str_to_title(x)},
                     values = c("#ffb84d", "grey85", "#62bba5")) +
   coord_cartesian(expand = FALSE) +
   guides(fill = guide_legend(keywidth = 0.8, keyheight = 0.8)) +
@@ -87,20 +86,20 @@ p_language <- afrisenti_summ %>%
         axis.ticks.y = element_blank(),
         strip.text.y.left = element_blank(),
         legend.position = "top",
-        legend.box.margin = margin(b = -5))
+        legend.box.margin = margin(b = -4))
 
 ## Language by country/region spoken in ---------------
 p_region <- languages_summ %>%
   ggplot(aes(x = country, y = language, fill = region)) +
   geom_tile(color = "#f6f1eb", linewidth = 0.6) +
-  geom_hline(yintercept = 0:6 + 0.5, color = "#dadada", linewidth = 0.5, linetype = 3) +
-  geom_vline(xintercept = 0:13 + 0.5, color = "#dadada", linewidth = 0.5, linetype = 3) +
+  geom_hline(yintercept = 0:6 + 0.5, color = "#ababab", linewidth = 0.4, linetype = 3) +
+  geom_vline(xintercept = 0:13 + 0.5, color = "#ababab", linewidth = 0.4, linetype = 3) +
   geom_tile(color = "#f6f1eb", linewidth = 0.6) +
   scale_y_discrete(limits = rev, labels = function(x) {str_replace(x, " ", "\n")}) +
-  facet_grid(language_family ~ region, scale = "free", space = "free", switch = "y") +
+  facet_grid(language_family ~ ., scale = "free", space = "free", switch = "y") +
   coord_cartesian(expand = FALSE) +
   scale_fill_manual(values = fresh_palette) +
-  labs(x = NULL, y = NULL, title = "Countries in which the language is spoken") +
+  labs(x = NULL, y = NULL, title = toupper("Countries spoken in")) +
   theme_custom + 
   theme(strip.text = element_blank(),
         axis.text.x = element_text(angle = 45, hjust = 1, size = 9),
@@ -115,30 +114,29 @@ p_n_tweets <- afrisenti %>%
   group_by(language_iso_code) %>%
   summarise(n = n()) %>%
   left_join(languages, by = "language_iso_code") %>%
-  left_join(language_scripts %>% group_by(language_iso_code) %>%
-              summarise(script = paste(script, collapse = "/")), 
-            by = "language_iso_code") %>%
   mutate(language = factor(language, levels(languages$language))) %>%
   ggplot(aes(y = language, x = n)) +
   geom_col(width = 0.85, fill = "#353525") +
-  facet_grid(language_family ~ ., scale = "free_y", space = "free_y", switch = "y") +
+  facet_grid(str_replace(language_family, "\\-", "-\n") %>% str_replace(" ", "\n") ~ ., 
+             scale = "free_y", space = "free_y", switch = "y") +
   scale_x_reverse(labels = function(x) {
                   x = paste0(x/1E3, "K"); x[x == '0K'] <- 0; x })+
   scale_y_discrete(limits = rev, labels = function(x) {str_replace(x, " ", "\n")})+
-  labs(x = NULL, y = NULL, title = "Language family   Language   No. of tweets",
+  labs(x = NULL, y = NULL, title = toupper("Language    Family  No. of tweets"),
        caption = "@akela@mstdn.social") +
   coord_cartesian(expand = FALSE, clip = "off") +
   theme_custom + 
-  theme(plot.title = element_text(size = 11, color = "#373634", hjust = 1.15),
-        plot.caption = element_text(size = 11, color = "#373634", hjust = 5, vjust = 1,
+  theme(plot.title = element_text(hjust = 1.12),
+        plot.caption = element_text(size = 10.5, hjust = 4.5, vjust = 1,
                                     face = "bold", margin = margin(t = 5, l = 0)),
         panel.border = element_rect(color = "#ababab", fill = NA, linewidth = 0.3),
-        strip.placement = "outside",
-        strip.text.y.left = element_text(angle = 0),
-        strip.background = element_rect(fill = "#ddd8d3"),
-        panel.grid.major.x = element_line(color = "#dadada", linewidth = 0.5, linetype = 3),
+        strip.text.y.left = element_text(angle = 0, margin = margin(l = 2, r = 2), size = 9),
+        strip.background = element_rect(fill = "#ddd8d3", color = "#ababab", linewidth = 0.3),
+        panel.grid.major.x = element_line(color = "#ababab", linewidth = 0.4, linetype = 3),
         panel.grid.major.y = element_blank(),
-        plot.margin = margin(5, 5, 5, 10))
+        plot.margin = margin(5, 5, 5, 10),
+        axis.text.y = element_text(face = "bold")
+        )
 
 
 ## Map of countries involved in the study ---------------------
@@ -189,7 +187,7 @@ p_map <- afr_tidy %>%
             family = "Corbel", color = "#373634", 
             lineheight = 1, inherit.aes = FALSE) +
   scale_color_identity() +
-  scale_fill_manual(values = fresh_palette, na.translate = FALSE, name = "Region") +
+  scale_fill_manual(values = fresh_palette, na.translate = FALSE, name = "REGION") +
   scale_y_continuous(limits = c(-50, 48)) +
   guides(fill = guide_legend(keywidth = 0.8, keyheight = 0.8)) +
   labs(title = "AfriSenti", caption = data_source) +
@@ -206,10 +204,10 @@ p_map <- afr_tidy %>%
         panel.border = element_blank(),
         legend.background = element_blank(), 
         plot.background = element_rect(fill = "#373634"),
-        plot.title = element_text(size = 18, color = "#373634", 
-                                  hjust = 0,  margin = margin(b = 0), face = "bold"),
-        plot.caption = element_markdown(size = 10, hjust = 0, color = "#373634",
-                                        vjust = 1, lineheight = 1.1, margin = margin(t = -3)))
+        plot.title = element_text(size = 18, hjust = 0, margin = margin(b = 0), 
+                                  face = "bold", family = "Corbel"),
+        plot.caption = element_markdown(size = 10, hjust = 0, vjust = 1, 
+                                        lineheight = 1.1, margin = margin(t = -3)))
 
 
 

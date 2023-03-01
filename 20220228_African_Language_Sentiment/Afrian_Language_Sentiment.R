@@ -217,6 +217,6 @@ p_map <- afr_tidy %>%
 g <- egg::ggarrange(p_n_tweets, p_language, p_region, p_map, nrow = 1, 
                     widths = c(0.25, 1, 0.65, 0.8))
 ggsave("20220228_African_Language_Sentiment/african_language.png",
-       g, height = 6, width = 15)
+       g, height = 6, width = 15, dpi = 600)
 
 

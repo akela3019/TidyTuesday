@@ -124,7 +124,7 @@ p_n_tweets <- afrisenti %>%
   scale_x_reverse(labels = function(x) {x = paste0(x/1E3, "K"); x[x == '0K'] <- 0; x },
                   breaks = seq(0, 2E4, 1E4))+
   scale_y_discrete(limits = rev, labels = function(x) {str_replace(x, " ", "\n")})+
-  labs(x = NULL, y = NULL, title = toupper("Language  Family  No. of tweets"),
+  labs(x = NULL, y = NULL, title = toupper("Language  Family No. of tweets"),
        caption = "@akela@mstdn.social") +
   coord_cartesian(expand = FALSE, clip = "off") +
   theme_custom + 
@@ -176,8 +176,7 @@ data_descript <- paste0(
 
 p_map <- afr_tidy %>%
   ggplot(aes(x = long, y = lat, fill = region)) + 
-  geom_rect(data = NULL, aes(xmin = min(long), xmax = max(long),
-                ymin = -50, ymax = 45), fill = "#ddd8d3") +
+  geom_rect(data = NULL, aes(xmin = min(long), xmax = max(long), ymin = -50, ymax = 42), fill = "#ddd8d3") +
   geom_polygon(aes(group = group), color = "#ababab", linewidth = 0.3, fill = "#f6f1eb") +
   geom_polygon(data = subset(afr_tidy, !is.na(region)), aes(group = group), 
                color = "#373634", linewidth = 0.4) +
@@ -187,13 +186,13 @@ p_map <- afr_tidy %>%
                    box.padding = 0.45, hjust = 0.5, vjust = 0.5, max.overlaps = Inf,
                    label.padding = 0.18, family = "Corbel", size = 3, show.legend = FALSE,
                    label.size = 0.3, segment.size = 0.3) +
-  geom_text(data = data.frame(x = -25, y = 54, label = data_descript), 
+  geom_text(data = data.frame(x = -25, y = 51, label = data_descript), 
             aes(x = x, y = y, label = label), vjust = 1, hjust = 0, size = 4, 
             family = "Corbel", color = "#373634", 
             lineheight = 1, inherit.aes = FALSE) +
   scale_color_identity() +
   scale_fill_manual(values = fresh_palette, na.translate = FALSE, name = "REGION") +
-  scale_y_continuous(limits = c(-50, 55)) +
+  scale_y_continuous(limits = c(-NA, 52)) +
   guides(fill = guide_legend(keywidth = 0.8, keyheight = 0.8)) +
   labs(title = "AfriSenti", caption = data_source) +
   coord_cartesian(expand = FALSE, clip = "off") +
@@ -220,6 +219,6 @@ p_map <- afr_tidy %>%
 g <- egg::ggarrange(p_n_tweets, p_language, p_region, p_map, nrow = 1, 
                     widths = c(0.25, 0.9, 0.73, 0.85))
 ggsave("20220228_African_Language_Sentiment/african_language.png",
-       g, height = 6, width = 13, dpi = 600)
+       g, height = 5, width = 13, dpi = 600)
 
 

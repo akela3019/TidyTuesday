@@ -5,7 +5,7 @@ library(ggrepel)
 library(maptools)
 library(grid)
 
-fresh_palette <- c("#65ADC2", "#E84646", "lightsteelblue4", "#C29365", "#168E7F")
+fresh_palette <- c("#65ADC2", "lightsteelblue4", "#168E7F", "#C29365", "#E84646")
 theme_light <- ggthemr::ggthemr("light")
 theme_custom <- theme(
   text = element_text(family = "Corbel", color = "#373634"),
@@ -43,13 +43,14 @@ afrisenti_summ <- afrisenti %>%
 
 languages <- languages %>%
   mutate(language_family = case_when(
-    language %in%  afro_asiatic ~ "Afro-Asiatic",
-    language == "Nigerian Pidgin" ~ "English Creole",
-    language == "Mozambican Portuguese" ~ "Indo-European",
-    language %in% niger_congo ~ "Niger-Congo")) %>%
+    language %in%  afro_asiatic ~ "Afro-\nAsiatic",
+    language == "Nigerian Pidgin" ~ "English\nCreole",
+    language == "Mozambican Portuguese" ~ "Indo-\nEuropean",
+    language %in% niger_congo ~ "Niger-\nCongo")) %>%
+  mutate(language_family = factor(language_family, c("Niger-\nCongo", "English\nCreole", "Afro-\nAsiatic", "Indo-\nEuropean"))) %>%
   left_join(subset(afrisenti_summ, label == "positive") %>%
               select(language_iso_code, percent), by = "language_iso_code") %>%
-  mutate(language = forcats::fct_reorder(language, percent, .desc = TRUE)) %>%
+  mutate(language = forcats::fct_reorder2(language, language_family, percent, .desc = TRUE)) %>%
   select(-percent)
 
 languages_summ <- languages %>%
@@ -59,7 +60,7 @@ languages_summ <- languages %>%
   mutate(region = ifelse(country == "Mozambique", "Southeast", region)) %>%
   mutate(region = str_remove(region, " Africa")) %>%
   mutate(region = ifelse(!str_detect(region, "ern$"), paste0(region, "ern"), region)) %>%
-  mutate(region = factor(region, paste0(c("North", "West", "South", "Southeast", "East"), "ern"))) %>%
+  mutate(region = factor(region, paste0(c("North", "West", "East", "Southeast", "South"), "ern"))) %>%
   arrange(language_family, region, country) %>%
   mutate(country = factor(country, unique(.$country)))
 
@@ -117,15 +118,13 @@ p_n_tweets <- afrisenti %>%
   group_by(language_iso_code) %>%
   summarise(n = n()) %>%
   left_join(languages, by = "language_iso_code") %>%
-  mutate(language = factor(language, levels(languages$language))) %>%
-  ggplot(aes(y = language, x = n)) +
+  ggplot(aes(x = n, y = language)) +
   geom_col(width = 0.85, fill = "#373634") +
-  facet_grid(str_replace(language_family, "\\-", "-\n") %>% str_replace(" ", "\n") ~ ., 
-             scale = "free_y", space = "free_y", switch = "y") +
+  facet_grid(language_family ~ ., scale = "free_y", space = "free_y", switch = "y") +
   scale_x_reverse(labels = function(x) {x = paste0(x/1E3, "K"); x[x == '0K'] <- 0; x },
                   breaks = seq(0, 2E4, 1E4))+
   scale_y_discrete(limits = rev, labels = function(x) {str_replace(x, " ", "\n")})+
-  labs(x = NULL, y = NULL, title = toupper("Language    Family  No. of tweets"),
+  labs(x = NULL, y = NULL, title = toupper("Language  Family  No. of tweets"),
        caption = "@akela@mstdn.social") +
   coord_cartesian(expand = FALSE, clip = "off") +
   theme_custom + 
@@ -164,16 +163,16 @@ afr_tidy_summ <- afr_tidy %>%
   distinct() %>%
   group_by(NAME, region) %>%
   summarise(long = mean(long), lat = mean(lat)) %>%
-  mutate(text_col = ifelse(region %in% c("Eastern", "Western", "Southern"), "white", "black"))
+  mutate(text_col = ifelse(region %in% c("Southeastern", "Northern"), "black", "white"))
 
 data_source <- paste(
-  c('**Source**: Muhammad, Shamsuddeen Hassan, et al. "AfriSenti: A',
-    'Twitter Sentiment Analysis Benchmark for African Languages."',
-    'arXiv preprint arXiv:2302.08956 (2023).'), 
+  c('**Source**: Muhammad, Shamsuddeen Hassan, et al. "AfriSenti: ',
+    'A Twitter Sentiment Analysis Benchmark for African Langu-',
+    'ages." arXiv preprint arXiv:2302.08956 (2023).'), 
   collapse = "<br/>")
 data_descript <- paste0(
-  "Sentiment analysis dataset covering 110,000+\n",
-  "annotated tweets in 14 African languages")
+  "Sentiment analysis dataset of 110,000+ annotated\n",
+  "tweets in 14 African languages")
 
 p_map <- afr_tidy %>%
   ggplot(aes(x = long, y = lat, fill = region)) + 
@@ -212,14 +211,14 @@ p_map <- afr_tidy %>%
         plot.background = element_rect(fill = NA),
         plot.title = element_text(size = 18, hjust = 0, margin = margin(b = 0), 
                                   face = "bold", family = "Corbel"),
-        plot.caption = element_markdown(size = 9.5, hjust = 0, vjust = 1, 
-                                        lineheight = 1.1, margin = margin(t = 0)))
+        plot.caption = element_markdown(size = 10, hjust = 0, vjust = 1, 
+                                        lineheight = 1.1, margin = margin(t = 2)))
 
 
 
 ## Arrange panels ----------------------------
 g <- egg::ggarrange(p_n_tweets, p_language, p_region, p_map, nrow = 1, 
-                    widths = c(0.25, 0.9, 0.7, 0.88))
+                    widths = c(0.25, 0.9, 0.73, 0.85))
 ggsave("20220228_African_Language_Sentiment/african_language.png",
        g, height = 6, width = 13, dpi = 600)
 

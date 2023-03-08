@@ -31,7 +31,7 @@ numbats <- readr::read_csv('20230307_Numbats_in_Australia/numbats.csv') %>%
     between(year, 2010, 2019) ~ "2010s",
     between(year, 2020, 2029) ~ "2020s")) %>%
   mutate(decade = as.factor(decade)) %>%
-  mutate(eventDate = ymd_hms(eventDate)) %>%
+  mutate(eventDate = with_tz(eventDate, tzone = "Australia/Perth")) %>%
   mutate(wday = factor(wday, c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"))) %>%
   mutate(month = month(eventDate, label = TRUE)) %>%
   mutate(month = fct_relevel(month, levels(.$month)[c(12, 1:11)])) %>%
@@ -245,13 +245,13 @@ subset(numbats, !is.na(hms)) %>%
 
 p_time <- numbats %>%
   filter(!is.na(eventDate)) %>%
-  filter(dataResourceName == "iNaturalist Australia") %>%
+    filter(dataResourceName == "iNaturalist Australia") %>%
   mutate(dryandra = case_when(is.na(dryandra) ~ "Unknown", 
                               dryandra == TRUE ~ "Dryandra Woodland",
                               dryandra == FALSE ~ "Other Locations")) %>%
   ggplot(aes(x = month, y = -hms)) +
-  geom_rect(data = data.frame(xmin = -Inf, ymin = -hms::as.hms("18:00:00"),
-                             xmax = Inf,  ymax = -hms::as.hms("06:00:00")),
+  geom_rect(data = data.frame(xmin = -Inf, ymin = -hms::as.hms("19:00:00"),
+                             xmax = Inf,  ymax = -hms::as.hms("07:00:00")),
             aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
             fill = swatch[1], alpha = 0.1, inherit.aes = FALSE) +
   geom_point(aes(color = dryandra)) +

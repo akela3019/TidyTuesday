@@ -223,7 +223,7 @@ p_month <- numbats %>%
                     name = "# SIGHTINGS", limits = c(1, 60)) +
   coord_cartesian(expand = FALSE) +
   guides(fill = guide_coloursteps(barheight = 0.5, barwidth = 12, title.vjust = 1)) +
-  labs(x = NULL, y = NULL, title = toupper("No. of Sightings by Month")) +
+  labs(x = NULL, y = NULL, title = toupper("\\# Numbat Sightings by Month")) +
   facet_grid( ~ season, scales = "free", switch = "y") +
   theme_custom +
   theme(panel.border = element_rect(fill = NA, linewidth = 0.4,
@@ -233,6 +233,20 @@ p_month <- numbats %>%
         panel.spacing.y = unit(0.1, "mm"),
         legend.position = "bottom", 
         legend.title = element_text(margin = margin(1, 5, 5, 5)))
+
+p_month_sub <- p_month + 
+  guides(fill = guide_coloursteps(barheight = 10, barwidth = 0.5, title.vjust = 1)) +
+  labs(caption = str_replace(map_caption, "Dataset", "<br/>Dataset"),
+       subtitle = "@akela@mstdn.social") +
+  theme(plot.title = element_markdown(hjust = 0, margin = margin(5, 5, -10, -25)),
+        plot.subtitle = element_text(hjust = 1.05, margin = margin(t = 0, b = 5)),
+        plot.caption = element_markdown(size = 11.5, margin = margin(10, 5, 5, -25), hjust = 0, lineheight = 1.2), 
+        panel.spacing.x = unit(1, "mm"),
+        legend.position = "right",
+        legend.title = element_blank())
+   
+ggsave("20230307_Numbats_in_Australia/numbat_sighting_by_month.png", 
+       p_month_sub, width = 4.8, height = 6)
 
 
 ## Sightings by hours --------------------

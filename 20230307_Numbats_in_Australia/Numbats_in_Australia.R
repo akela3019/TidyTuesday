@@ -246,7 +246,7 @@ p_month_sub <- p_month +
         legend.title = element_blank())
    
 ggsave("20230307_Numbats_in_Australia/numbat_sighting_by_month.png", 
-       p_month_sub, width = 4.8, height = 6)
+       p_month_sub, width = 4.8, height = 6, dpi = 600)
 
 
 ## Sightings by hours --------------------
@@ -324,5 +324,5 @@ g_sighting <- cowplot::ggdraw(g_sighting)+
         plot.margin = margin(-20, 5, 3, 5))
 
 ggsave("20230307_Numbats_in_Australia/numbat_sighting.png", g_sighting,
-       width = 8.5, height = 7.5)
+       width = 8.5, height = 7.5, dpi = 600)
   

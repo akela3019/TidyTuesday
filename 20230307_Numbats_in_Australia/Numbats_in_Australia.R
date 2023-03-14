@@ -223,7 +223,7 @@ p_month <- numbats %>%
                     name = "# SIGHTINGS", limits = c(1, 60)) +
   coord_cartesian(expand = FALSE) +
   guides(fill = guide_coloursteps(barheight = 0.5, barwidth = 12, title.vjust = 1)) +
-  labs(x = NULL, y = NULL, title = toupper("\\# Numbat Sightings by Month")) +
+  labs(x = NULL, y = NULL) +
   facet_grid( ~ season, scales = "free", switch = "y") +
   theme_custom +
   theme(panel.border = element_rect(fill = NA, linewidth = 0.4,
@@ -236,17 +236,66 @@ p_month <- numbats %>%
 
 p_month_sub <- p_month + 
   guides(fill = guide_coloursteps(barheight = 10, barwidth = 0.5, title.vjust = 1)) +
-  labs(caption = str_replace(map_caption, "Dataset", "<br/>Dataset"),
-       subtitle = "@akela@mstdn.social") +
-  theme(plot.title = element_markdown(hjust = 0, margin = margin(5, 5, -10, -25)),
-        plot.subtitle = element_text(hjust = 1.05, margin = margin(t = 0, b = 5)),
-        plot.caption = element_markdown(size = 11.5, margin = margin(10, 5, 5, -25), hjust = 0, lineheight = 1.2), 
-        panel.spacing.x = unit(1, "mm"),
+  theme(panel.spacing.x = unit(1, "mm"),
         legend.position = "right",
         legend.title = element_blank())
-   
+
+
+p_year_total <- numbats %>% 
+  count(year) %>%
+  filter(!is.na(year)) %>%
+  mutate(hjust = ifelse(n == max(.$n), 0, 1)) %>%
+  ggplot(aes(y = as.factor(year), x = -n)) +
+  geom_col() +
+  geom_text(aes(label = n, hjust = hjust), family = "Dubai", size = 3) +
+  scale_x_continuous(expand = expansion(add = c(0, 0))) +
+  scale_y_discrete(limits = rev) +
+  labs(x = NULL, y = NULL) +
+  theme_custom +
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.line = element_blank(),
+        plot.margin = margin(r = -10),
+        panel.grid.major.y = element_blank())
+
+p_month_total <- numbats %>% 
+  count(season, month) %>%
+  filter(!is.na(month)) %>%
+  mutate(vjust = ifelse(n == max(.$n), 0, 1)) %>%
+  ggplot(aes(x = month, y = -n)) +
+  geom_col() +
+  facet_grid( ~ season, scales = "free") +
+  geom_text(aes(label = n, vjust = vjust), family = "Dubai", size = 3) +
+  scale_y_continuous(expand = expansion(add = c(0, 0))) +
+  coord_cartesian(clip = "off") +
+  labs(x = NULL, y = NULL, caption = str_replace(map_caption, " Dataset", "<br/>Dataset")) +
+  theme_custom +
+  theme(plot.caption = element_markdown(size = 11.5, hjust = 0, lineheight = 1.2,
+                                        margin = margin(l = -30, t = 5)),
+        strip.background = element_blank(),
+        plot.title = element_markdown(hjust = 0, margin = margin(5, 5, -10, -25)),
+        plot.margin = margin(t = -35),
+        panel.grid.major.y = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.line = element_blank())
+
+p_blank <- ggplot() + theme_void() + theme_custom +
+  theme(axis.line = element_blank())
+
+g <- egg::ggarrange(p_year_total, p_month_sub, p_blank,
+                    p_month_total, nrow = 2,
+                    widths = c(0.12, 1), heights = c(1, 0.08),
+                    top = textGrob(label = c(toupper("Numbat Sightings by Month"), "@akela@mstdn.social"), 
+                                   x = c(0.11, 0.99), y = c(0.05, 0.1), vjust = 0, hjust = c(0, 1), 
+                                   gp = gpar(fontsize = c(14, 11), fontfamily = "Dubai", 
+                                             col = swatch[1], fontface = c("bold", "plain"))))
+g <- cowplot::ggdraw(g) +
+  theme(plot.background = element_rect(fill = bkground_col, color = NA),
+        plot.margin = margin(t = -20, 5, 5, 5))
+
 ggsave("20230307_Numbats_in_Australia/numbat_sighting_by_month.png", 
-       p_month_sub, width = 4.8, height = 6, dpi = 600)
+       g, width = 5.5, height = 7, dpi = 600)
 
 
 ## Sightings by hours --------------------

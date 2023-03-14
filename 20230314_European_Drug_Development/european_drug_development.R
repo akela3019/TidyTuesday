@@ -149,7 +149,7 @@ plot_grid(p_top25_therap_areas_ndrugs,
 
 
 ggsave("20230314_European_Drug_Development/therapeautic_areas.png", 
-       width = 13, height = 5.5)
+       width = 13, height = 5.5, dpi = 500)
 
 # Top 20  Marketing Authorisation Holders -------------
 top_company <- drugs_human %>%
@@ -253,7 +253,7 @@ plot_grid(p_top20_company_ndrugs, p_top20_company_approve_rate, p_scatter_compan
         plot.margin = margin(t = 5, b = 5))
 
 ggsave("20230314_European_Drug_Development/pharma_company.png", 
-       width = 13, height = 5.5)
+       width = 13, height = 5.5, dpi = 500)
 
 
 

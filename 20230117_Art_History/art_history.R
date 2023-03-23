@@ -5,8 +5,6 @@ library(extrafont)
 library(ggtext)
 library(ggrepel)
 library(grid)
-library(geosphere)
-library(ggmap)
 
 theme_flat <- ggthemr::ggthemr("flat")
 swatch <- theme_flat$palette$swatch
